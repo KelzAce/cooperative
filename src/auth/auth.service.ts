@@ -1,5 +1,5 @@
 // src/auth/auth.service.ts
-import { Body, Injectable } from '@nestjs/common';
+import { BadRequestException, Body, Injectable } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -16,18 +16,23 @@ export class AuthService {
   ) {}
 
   // Methods for AuthService go here
-  async register(createUserDto: CreateUserDto) {
-    const { first_name, last_name, email, password } = createUserDto;
+  async register(body: CreateUserDto) {
+    const { first_name, last_name, email, password } = body;
+
+    if(body.email){
+      throw new BadRequestException('Credentials already in use');
+    }
 
     try {
       // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(body.password, 10);
 
       // Generate OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       // Create and save the user
       const user = new User();
+
       user.first_name = first_name; 
       user.last_name = last_name;
       user.email = email;

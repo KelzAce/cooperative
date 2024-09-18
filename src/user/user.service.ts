@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { Role } from './entities/role.enum';
+import { Role, Status } from './entities/role.enum';
 
 @Injectable()
 export class UserService {
@@ -37,7 +37,7 @@ export class UserService {
       user.bvn = bvn;
       user.bankAccountNumber = bankAccountNumber;
       user.photoUrl = photoUrl;
-      user.status = 'verified';
+      user.status = Status.Verified;
       return this.userRepository.save(user);
     } else {
       throw new Error('Unauthorized to verify members');
