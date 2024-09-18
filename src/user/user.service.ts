@@ -1,26 +1,46 @@
+// src/user/user.service.ts
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+import { Role } from './entities/role.enum';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
+
+  // Method to find a user by ID
+  async findUserById(id: number): Promise<User> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  // Method to find a user by email
+  async findUserByEmail(email: string): Promise<User> {
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  // Method to save or update a user
+  async saveUser(user: User): Promise<User> {
+    return this.userRepository.save(user);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  // Method to verify a member
+  async verifyMember(userId: number, bvn: string, bankAccountNumber: string, photoUrl: string, verifierRole: Role) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new Error('User not found');
+    if (user.status === 'verified') throw new Error('User already verified');
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    if (verifierRole === Role.President || verifierRole === Role.FinancialSecretary) {
+      user.bvn = bvn;
+      user.bankAccountNumber = bankAccountNumber;
+      user.photoUrl = photoUrl;
+      user.status = 'verified';
+      return this.userRepository.save(user);
+    } else {
+      throw new Error('Unauthorized to verify members');
+    }
   }
 }

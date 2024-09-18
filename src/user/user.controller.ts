@@ -1,34 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+// src/user/user.controller.ts
+import { Controller, Param, Post, Body } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Role } from './entities/role.enum';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Post('verify-member/:id')
+  async verifyMember(userId: number, bvn: string, bankAccountNumber: string, photoUrl: string, verifierRole: string) {
+    // Convert verifierRole to Role enum
+    const role = Role[verifierRole as keyof typeof Role];
+  
+    if (!role) {
+      throw new Error('Invalid role');
+    }
+  
+    return this.userService.verifyMember(userId, bvn, bankAccountNumber, photoUrl, role);
   }
 }
