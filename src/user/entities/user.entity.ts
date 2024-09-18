@@ -46,5 +46,5 @@ export class User {
     enum: Status,
     default: 'pending' 
   })
-  status: string; // pending or verified
+  status: Status; // pending or verified
 }
