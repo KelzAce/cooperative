@@ -1,25 +1,38 @@
-// src/auth/auth.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginDto } from './dto/login-user.dto';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
-  @Post('register')
-  async register(@Body() body: CreateUserDto) {
-    return this.authService.register(body);
-  }
-
-  @Post('verify-email')
-  async verifyEmail(@Body('email') email: string, @Body('otp') otp: string) {
-    return this.authService.verifyEmail(email, otp);
+  @Post('signup')
+  async signup(@Body() body: CreateUserDto) {
+    return await this.authService.signup(body);
   }
 
   @Post('login')
   async login(@Body() body: LoginDto) {
-    return this.authService.login(body);
+    return await this.authService.login(body);
+  }
+
+  @Get('/otp')
+  async sendOtp(@Query() query: SendOtpDto) {
+    return await this.authService.sendOtp(query);
+  }
+
+  @Patch('/verify-email')
+  async verifyEmail(@Body() body: VerifyOtpDto) {
+    return await this.authService.verifyEmail(body);
   }
 }
