@@ -35,7 +35,7 @@ export class UserService {
 
     const userExists = await this.getUser(email);
     if (userExists) {
-      throw new BadRequestException(`The email: "${email}" is already taken`);
+      throw new BadRequestException(`The email: "${email}" is already taken, Please provide another email`);
     }
 
     const user = await this.userModel.create({
