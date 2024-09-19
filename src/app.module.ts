@@ -1,20 +1,26 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AppController } from './app.controller';
+import { configuration } from './config';
+import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
-import { ConfigModule } from '@nestjs/config';
-import { dataSourceOptions } from './database/data-source';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
-    TypeOrmModule.forRoot(dataSourceOptions),
-    AuthModule,
-    UserModule,
-  ],
+  imports: [ConfigModule.forRoot({
+    load: [configuration],
+    isGlobal: true
+  }), MongooseModule.forRootAsync({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: async (configService: ConfigService) => {
+      return {
+        uri: configService.get<string>('db.uri'),
+      };
+    },
+  }), AuthModule, UserModule ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

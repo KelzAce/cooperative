@@ -1,108 +1,75 @@
-// src/auth/auth.service.ts
-import { BadRequestException, Body, Injectable } from '@nestjs/common';
-import { UserService } from '../user/user.service';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-import * as nodemailer from 'nodemailer';
-import { User } from '../user/entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { LoginDto } from './dto/login-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { EmailService } from 'src/email/email.service';
+import { EmailTemplate } from 'src/email/email-templates';
+import { SendOtpDto } from './dto/send-otp.dto';
+import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private userService: UserService,
-    private jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly configService: ConfigService,
+    private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
   ) {}
 
-  // Methods for AuthService go here
-  async register(@Body() body: CreateUserDto) {
-    const { first_name, last_name, email, password } = body;
+  async signup(dto: CreateUserDto) {
+    const user = await this.userService.createUser(dto);
 
+    const otp = await this.sendOtp({ email: user.email });
 
-    const existingUser = this.userRepository.findOne({where: {email : body.email}})
+    const token = this.jwtService.sign({ sub: user.id });
 
-    if(existingUser){
-      throw new BadRequestException("This Credentials is already in use")
-    }
-    
-    if(email){
-      throw new BadRequestException('Credentials already in use');
-    }
-
-    try {
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Generate OTP
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // Create and save the user
-      const user = new User();
-
-      user.first_name = first_name; 
-      user.last_name = last_name;
-      user.email = email;
-      user.password = hashedPassword;
-      user.otp = otp;
-
-      await this.userService.saveUser(user);
-
-      // Send OTP email
-      await this.sendOTPEmail(email, otp);
-
-      return { message: 'OTP sent to your email' };
-    } catch (error) {
-      // Handle specific errors with more detail
-      if (error.message.includes('user already exists')) {
-        throw new Error('A user with this email already exists. Please use a different email address.');
-      } else if (error.message.includes('Failed to send OTP email')) {
-        throw new Error('Failed to send OTP email. Please try again later.');
-      } else {
-        throw new Error(`Registration failed: ${error.message}`);
-      }
-    }
+    return { message: 'Signup successfully!', token, otp };
   }
 
-  async sendOTPEmail(email: string, otp: string) {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'your-email@gmail.com',
-        pass: 'your-email-password',
-      },
-    });
+  async sendOtp(dto: SendOtpDto) {
+    const { email } = dto;
 
-    const mailOptions = {
-      from: 'your-email@gmail.com',
-      to: email,
-      subject: 'Email Verification OTP',
-      text: `Your OTP is ${otp}`,
-    };
+    const user = await this.userService.getUserOrThrow(email);
 
-    await transporter.sendMail(mailOptions);
+    const otp = await user.generateOtp();
+
+    // todo: sign up on another mailoing service or configure my mail to work with nodemailer
+
+    // await this.emailService.sendEmailFromTemplate({
+    //   to: email,
+    //   templateId: EmailTemplate.OTP,
+    //   dynamicTemplateData: { name: user.name.firstname, otp },
+    // });
+
+    return otp;
   }
 
-  async verifyEmail(email: string, otp: string) {
-    const user = await this.userService.findUserByEmail(email);
-    if (user && user.otp === otp) {
-      user.isEmailVerified = true;
-      return this.userService.saveUser(user);
+  async login(dto: LoginDto) {
+    const { email, password } = dto;
+
+    const user = await this.userService.getUser(email);
+    if (!user || !(await user.verifyPassword(password))) {
+      throw new UnauthorizedException('Invalid credentials!');
     }
-    throw new Error('Invalid OTP');
+
+    const token = this.jwtService.sign({ sub: user.id });
+
+    return { message: 'Login successful', token };
   }
 
-  async login(loginUserDto: LoginDto) {
-    const { email, password } = loginUserDto;
-    const user = await this.userService.findUserByEmail(email);
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new Error('Invalid credentials');
-    }
-    const payload = { email: user.email, sub: user.id };
-    return { access_token: this.jwtService.sign(payload) };
+  async verifyEmail(dto: VerifyOtpDto) {
+    const { email, otp } = dto;
+
+    const user = await this.userService.getUserOrThrow(email);
+
+    if (!(await user.verifyOtp(otp)))
+      throw new BadRequestException('OTP is invalid!');
+
+    user.emailVerified = true;
+    await user.save();
+
+    return { message: 'Email verified successfully!' };
   }
 }
