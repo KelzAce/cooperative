@@ -8,7 +8,7 @@ export class UserController {
   constructor(private userService: UserService) {}
 
   @Post('verify-member/:id')
-  async verifyMember(userId: number, bvn: string, bankAccountNumber: string, photoUrl: string, verifierRole: string) {
+  async verifyMember(id: number, bvn: string, bankAccountNumber: string, photoUrl: string, verifierRole: string) {
     // Convert verifierRole to Role enum
     const role = Role[verifierRole as keyof typeof Role];
   
@@ -16,6 +16,6 @@ export class UserController {
       throw new Error('Invalid role');
     }
   
-    return this.userService.verifyMember(userId, bvn, bankAccountNumber, photoUrl, role);
+    return this.userService.verifyMember(id, bvn, bankAccountNumber, photoUrl, role);
   }
 }

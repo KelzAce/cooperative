@@ -7,25 +7,36 @@ import * as nodemailer from 'nodemailer';
 import { User } from '../user/entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private userService: UserService,
     private jwtService: JwtService,
   ) {}
 
   // Methods for AuthService go here
-  async register(body: CreateUserDto) {
+  async register(@Body() body: CreateUserDto) {
     const { first_name, last_name, email, password } = body;
 
-    if(body.email){
+
+    const existingUser = this.userRepository.findOne({where: {email : body.email}})
+
+    if(existingUser){
+      throw new BadRequestException("This Credentials is already in use")
+    }
+    
+    if(email){
       throw new BadRequestException('Credentials already in use');
     }
 
     try {
       // Hash the password
-      const hashedPassword = await bcrypt.hash(body.password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
 
       // Generate OTP
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
