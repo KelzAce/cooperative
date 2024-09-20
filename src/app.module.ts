@@ -4,9 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { configuration } from './config';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { CooperativeModule } from './cooperative/cooperative.module';
+import { AuthModule } from './Auth/auth.module';
+import { UserModule } from './User/user.module';
+import { CooperativeModule } from './Cooperative/cooperative.module';
 import { LoanModule } from './Loan/loan.module';
 
 @Module({

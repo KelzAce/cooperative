@@ -1,15 +1,15 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from 'src/user/user.service';
+import { UserService } from 'src/User/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { EmailService } from 'src/email/email.service';
-import { EmailTemplate } from 'src/email/email-templates';
+import { CreateUserDto } from 'src/User/dto/create-user.dto';
+import { EmailService } from 'src/Email/email.service';
+import { EmailTemplate } from 'src/Email/email-templates';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
-import { CooperativeService } from 'src/cooperative/cooperative.service';
-import { JoinCooperativeDto } from 'src/cooperative/dto/join-cooperative.dto';
+import { CooperativeService } from 'src/Cooperative/cooperative.service';
+import { JoinCooperativeDto } from 'src/Cooperative/dto/join-cooperative.dto';
 
 
 @Injectable()

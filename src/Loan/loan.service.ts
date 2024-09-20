@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Loan, LoanDocument } from './schemas/loan.schema';
-import { Cooperative } from '../cooperative/schemas/cooperative.schema';
+import { Cooperative } from '../Cooperative/schemas/cooperative.schema';
 
 @Injectable()
 export class LoanService {

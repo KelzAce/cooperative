@@ -3,9 +3,9 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { UserModule } from 'src/user/user.module';
-import { EmailService } from 'src/email/email.service';
-import { CooperativeModule } from 'src/cooperative/cooperative.module';
+import { UserModule } from 'src/User/user.module';
+import { EmailService } from 'src/Email/email.service';
+import { CooperativeModule } from 'src/Cooperative/cooperative.module';
 
 @Module({
   imports: [

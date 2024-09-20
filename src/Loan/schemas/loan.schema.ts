@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { Types } from 'mongoose';
-import { Cooperative } from '../../cooperative/schemas/cooperative.schema';
+import { Cooperative } from '../../Cooperative/schemas/cooperative.schema';
 
 export type LoanDocument = Loan & Document;
 

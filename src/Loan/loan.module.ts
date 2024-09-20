@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LoanService } from './loan.service';
 import { LoanController } from './loan.controller';
 import { Loan, LoanSchema } from './schemas/loan.schema';
-import { Cooperative, CooperativeSchema } from '../cooperative/schemas/cooperative.schema';
+import { Cooperative, CooperativeSchema } from '../Cooperative/schemas/cooperative.schema';
 
 @Module({
   imports: [

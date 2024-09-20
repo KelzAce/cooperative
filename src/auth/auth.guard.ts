@@ -9,7 +9,7 @@ import {
   import { JwtService } from '@nestjs/jwt';
   import { Request } from 'express';
   import { Types } from 'mongoose';
-  import { UserService } from 'src/user/user.service';
+  import { UserService } from 'src/User/user.service';
   
   export type PopulatedRequest = Request & { user: { id: Types.ObjectId } };
   
