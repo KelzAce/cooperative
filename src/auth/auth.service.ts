@@ -8,6 +8,9 @@ import { EmailTemplate } from 'src/email/email-templates';
 import { SendOtpDto } from './dto/send-otp.dto';
 import { LoginDto } from './dto/login.dto';
 import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { CooperativeService } from 'src/cooperative/cooperative.service';
+import { JoinCooperativeDto } from 'src/cooperative/dto/join-cooperative.dto';
+
 
 @Injectable()
 export class AuthService {
@@ -16,12 +19,17 @@ export class AuthService {
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService,
+    private readonly cooperativeService: CooperativeService
   ) {}
 
   async signup(dto: CreateUserDto) {
     const user = await this.userService.createUser(dto);
 
     const otp = await this.sendOtp({ email: user.email });
+
+
+
+    // const joinCooperative = this.cooperativeService.generateJoinLink(joinCooperativedto)
 
     const token = this.jwtService.sign({ sub: user.id });
 
@@ -35,7 +43,7 @@ export class AuthService {
 
     const otp = await user.generateOtp();
 
-    // todo: sign up on another mailoing service or configure my mail to work with nodemailer
+    // todo: sign up on another mailing service or configure my mail to work with nodemailer
 
     // await this.emailService.sendEmailFromTemplate({
     //   to: email,

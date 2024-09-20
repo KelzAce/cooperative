@@ -6,6 +6,8 @@ import { configuration } from './config';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { CooperativeModule } from './cooperative/cooperative.module';
+import { LoanModule } from './Loan/loan.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -19,7 +21,7 @@ import { UserModule } from './user/user.module';
         uri: configService.get<string>('db.uri'),
       };
     },
-  }), AuthModule, UserModule ],
+  }), AuthModule, UserModule, CooperativeModule, LoanModule ],
   controllers: [AppController],
   providers: [AppService],
 })
